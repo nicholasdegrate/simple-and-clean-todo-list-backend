@@ -1,0 +1,54 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: todo_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: todo_list_db
+      MYSQL_USER: todo_user
+      MYSQL_PASSWORD: todo_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - todo_network
+
+  mysql_shadow:
+    image: mysql:8.0
+    container_name: todo_mysql_shadow
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: todo_list_shadow_db
+      MYSQL_USER: todo_user
+      MYSQL_PASSWORD: todo_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_shadow_data:/var/lib/mysql
+    networks:
+      - todo_network
+
+  adminer:
+    image: adminer:latest
+    container_name: todo_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - todo_network
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
+    driver: local
+  mysql_shadow_data:
+    driver: local
+
+networks:
+  todo_network:
+    driver: bridge 
